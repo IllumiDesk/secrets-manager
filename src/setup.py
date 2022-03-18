@@ -36,7 +36,8 @@ setup(
     packages=find_packages(where=".",exclude="./tests"),
     install_requires=[
         "boto3==1.21.19",
-        "botocore==1.24.21"
+        "botocore==1.24.21",
+        "pytest==7.1.1"
     ],  # noqa: E231
     package_data={
         "": ["*.html"],
