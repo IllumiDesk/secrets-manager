@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 import logging
 import logging.config
 from os import path
+import os
 
 # 
 log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging_config.ini")
@@ -17,11 +18,20 @@ logger = logging.getLogger('secretsmanager')
 
 class SecretsManager:
     
-    def __init__(self, secret_name, region_name='us-west-2'):
+    def __init__(self, secret_name, region_name='us-west-2', host=''):
         self.region_name = region_name
         self.secret_name = secret_name
-        self.db_secret = self.get_db_secret(secret_name)
+        self.db_secret = dict(self.get_db_secret(secret_name))
+        if self.db_secret["host"] == '':
+            self.db_secret["host"] = host
     
+    @property
+    def rds_connection_string(self):
+        return f'postgresql://{self.db_secret["username"]}:{self.db_secret["password"]}@{self.db_secret["host"]}:{self.db_secret["port"]}/{self.db_secret["dbname"]}'
+
+    def rds_connection(self, database):
+        return f'postgresql://{self.db_secret["username"]}:{self.db_secret["password"]}@{self.db_secret["host"]}:{self.db_secret["port"]}/{database}'
+
     
     def get_db_secret(self, secret_name, region_name='us-west-2'):
 
@@ -76,6 +86,6 @@ class SecretsManager:
         finally:
             return json.loads(secret) if secret != '' else {'engine': '', 'username': '', 'password': '', 'dbname': '', 'port': '', 'host': ''}
 
-secretsmanager = SecretsManager("arn:aws:secretsmanager:us-west-2:860100747351:secret:RDSConfig-JMVgcU")
+
 
     
