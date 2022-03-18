@@ -6,7 +6,14 @@ import boto3
 import json
 import base64
 from botocore.exceptions import ClientError
+import logging
+import logging.config
+from os import path
 
+# 
+log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging_config.ini")
+logging.config.fileConfig(log_file_path)
+logger = logging.getLogger('secretsmanager')
 
 class SecretsManager:
     
@@ -14,8 +21,6 @@ class SecretsManager:
         self.region_name = region_name
         self.secret_name = secret_name
         self.db_secret = self.get_db_secret(secret_name)
-        
-
     
     
     def get_db_secret(self, secret_name, region_name='us-west-2'):
@@ -26,6 +31,7 @@ class SecretsManager:
             service_name='secretsmanager',
             region_name=region_name
         )
+        secret = ''
 
         # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
         # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
@@ -34,6 +40,9 @@ class SecretsManager:
             get_secret_value_response = client.get_secret_value(
                 SecretId=secret_name
             )
+            logger.debug(f'Fetched Secret: {get_secret_value_response}')
+            
+            logger.info(f'Secret Recieved Status: %s\n Request ID: %s' % (get_secret_value_response["ResponseMetadata"]["HTTPStatusCode"], get_secret_value_response["ResponseMetadata"]["RequestId"]) )
         except ClientError as e:
             if e.response['Error']['Code'] == 'DecryptionFailureException':
                 # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
@@ -58,15 +67,15 @@ class SecretsManager:
         else:
             # Decrypts secret using the associated KMS key.
             # Depending on whether the secret is a string or binary, one of these fields will be populated.
-            secret = ''
+            
             if 'SecretString' in get_secret_value_response:
                 secret = get_secret_value_response['SecretString']
             else:
                 secret = base64.b64decode(get_secret_value_response['SecretBinary'])
 
         finally:
-            return secret
+            return json.loads(secret) if secret != '' else {'engine': '', 'username': '', 'password': '', 'dbname': '', 'port': '', 'host': ''}
 
 secretsmanager = SecretsManager("arn:aws:secretsmanager:us-west-2:860100747351:secret:RDSConfig-JMVgcU")
-print(secretsmanager.db_secret)
+
     
