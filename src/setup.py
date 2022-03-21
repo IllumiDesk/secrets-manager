@@ -24,7 +24,7 @@ with open(os.path.join("_version.py")) as f:
 
 
 setup(
-    name="secretsmanager",
+    name="secretsmanager-illumidesk",
     version=version_ns["__version__"],
     description="IllumiDesk secrets-manager package",
     long_description=open("README.md").read(),
