@@ -86,6 +86,4 @@ class SecretsManager:
         finally:
             return json.loads(secret) if secret != '' else {'engine': '', 'username': '', 'password': '', 'dbname': '', 'port': '', 'host': ''}
 
-
-
     
