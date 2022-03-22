@@ -91,4 +91,3 @@ class SecretsManager:
         finally:
             return json.loads(secret) if secret != '' else {'engine': '', 'username': '', 'password': '', 'dbname': '', 'port': '', 'host': ''}
 
-sm = SecretsManager("arn:aws:secretsmanager:us-west-2:860100747351:secret:RDSConfig-JMVgcU")
