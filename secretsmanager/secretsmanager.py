@@ -11,10 +11,15 @@ import logging.config
 from os import path
 import os
 
-# 
-log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging_config.ini")
-logging.config.fileConfig(log_file_path)
-logger = logging.getLogger('secretsmanager')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# passing this to for file_handler and not formatter
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
 
 class SecretsManager:
     
@@ -86,4 +91,4 @@ class SecretsManager:
         finally:
             return json.loads(secret) if secret != '' else {'engine': '', 'username': '', 'password': '', 'dbname': '', 'port': '', 'host': ''}
 
-    
+sm = SecretsManager("arn:aws:secretsmanager:us-west-2:860100747351:secret:RDSConfig-JMVgcU")
